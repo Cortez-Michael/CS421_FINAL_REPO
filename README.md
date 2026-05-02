@@ -88,7 +88,7 @@ pip install torch torchvision torchaudio --index-url https://download.pytorch.or
 pip install transformers huggingface_hub python-dotenv scikit-learn pandas numpy scipy shap requests matplotlib seaborn wordcloud spacy
 ```
 
-> **Note:** The torch install command above targets CPU only. If you have a GPU and want to use it, replace the URL with your CUDA version from [https://pytorch.org/get-started/locally](https://pytorch.org/get-started/locally).
+> **Note:** The torch install command above targets CPU only.
 
 ### 3. Download the spaCy Spanish language model
 
@@ -129,7 +129,7 @@ Weights are downloaded automatically on first run and cached locally.
 
 ## Ollama Setup
 
-Gemma and Llama models run locally via [Ollama](https://ollama.com). No GPU is required for inference, though it will be slower on CPU.
+Gemma and Llama models run locally via [Ollama](https://ollama.com).
 
 ### 1. Install Ollama
 
