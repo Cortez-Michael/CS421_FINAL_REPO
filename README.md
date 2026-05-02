@@ -107,8 +107,6 @@ pip install torch torchvision torchaudio --index-url https://download.pytorch.or
 pip install transformers huggingface_hub python-dotenv scikit-learn pandas numpy scipy shap requests matplotlib seaborn wordcloud spacy
 ```
 
-> **Note:** The torch install command above targets CPU only.
-
 ### 3. Download the spaCy Spanish language model
 
 Required for keyword filtering in `keyword_plots.py`:
