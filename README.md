@@ -133,7 +133,7 @@ Go to [https://huggingface.co/settings/tokens](https://huggingface.co/settings/t
 HF_TOKEN=hf_your_token_here
 ```
 
-The scripts load this automatically via `python-dotenv`. Do not commit this file to version control.
+The scripts load this automatically via `python-dotenv`.
 
 ### Models used
 
@@ -142,7 +142,6 @@ The scripts load this automatically via `python-dotenv`. Do not commit this file
 | `mBERT.py` | `AnasAlokla/multilingual_go_emotions` |
 | `XLM_roberta.py` | `tabularisai/multilingual-emotion-classification` |
 
-Weights are downloaded automatically on first run and cached locally.
 
 ---
 
@@ -168,14 +167,6 @@ Keep this running in a separate terminal for the duration of your session.
 ollama pull gemma4:e4b
 ollama pull llama3.1:8b
 ollama pull qwen2.5:14b        # Required for emo_parse.py only
-```
-
-### 4. (Optional) Enable parallel inference for Llama few-shot
-
-`llama_few_shot.py` uses multithreading with 8 workers. To match this on the Ollama side, set the following environment variable before starting `ollama serve`:
-
-```bash
-OLLAMA_NUM_PARALLEL=8 ollama serve
 ```
 
 ---
