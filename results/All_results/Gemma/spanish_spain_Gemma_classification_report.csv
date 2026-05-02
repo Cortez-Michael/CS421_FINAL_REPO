@@ -1,0 +1,11 @@
+model,class,precision,recall,f1_score,support,row_type
+Gemma,anger,0.5133,0.5641,0.5375,273,per_class
+Gemma,disgust,0.1024,0.2453,0.1444,53,per_class
+Gemma,fear,0.5,0.4545,0.4762,33,per_class
+Gemma,joy,0.6317,0.7848,0.7,553,per_class
+Gemma,others,0.7365,0.5739,0.6451,1096,per_class
+Gemma,sadness,0.7127,0.7955,0.7518,396,per_class
+Gemma,surprise,0.3077,0.198,0.241,101,per_class
+Gemma,macro avg,0.5006,0.5166,0.4994,2505,aggregate
+Gemma,weighted avg,0.6515,0.6307,0.6333,2505,aggregate
+Gemma,accuracy,,,0.6307,,aggregate

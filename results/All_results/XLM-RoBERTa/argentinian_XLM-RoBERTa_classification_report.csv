@@ -1,0 +1,11 @@
+model,class,precision,recall,f1_score,support,row_type
+XLM-RoBERTa,anger,0.4186,0.3186,0.3618,226,per_class
+XLM-RoBERTa,disgust,0.1316,0.125,0.1282,40,per_class
+XLM-RoBERTa,fear,0.0938,0.8571,0.169,7,per_class
+XLM-RoBERTa,joy,0.6038,0.5385,0.5693,351,per_class
+XLM-RoBERTa,others,0.5423,0.6784,0.6028,538,per_class
+XLM-RoBERTa,sadness,0.4722,0.3091,0.3736,110,per_class
+XLM-RoBERTa,surprise,0.3243,0.1237,0.1791,97,per_class
+XLM-RoBERTa,macro avg,0.3695,0.4215,0.3405,1369,aggregate
+XLM-RoBERTa,weighted avg,0.5023,0.4989,0.4899,1369,aggregate
+XLM-RoBERTa,accuracy,,,0.4989,,aggregate

@@ -1,0 +1,11 @@
+model,class,precision,recall,f1_score,support,row_type
+Llama,anger,0.4865,0.7347,0.5854,98,per_class
+Llama,disgust,0.1212,0.3636,0.1818,22,per_class
+Llama,fear,0.0476,0.2,0.0769,5,per_class
+Llama,joy,0.549,0.6667,0.6022,42,per_class
+Llama,others,0.8788,0.145,0.2489,200,per_class
+Llama,sadness,0.4271,0.8723,0.5734,47,per_class
+Llama,surprise,0.1429,0.125,0.1333,8,per_class
+Llama,macro avg,0.379,0.4439,0.3431,422,aggregate
+Llama,weighted avg,0.6413,0.4265,0.3906,422,aggregate
+Llama,accuracy,,,0.4265,,aggregate
