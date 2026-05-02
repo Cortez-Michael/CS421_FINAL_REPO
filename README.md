@@ -57,7 +57,7 @@ project/
 │   │   ├── average_macro_f1_bar.png
 │   │   ├── average_weighted_f1_bar.png
 │   │   └── single_grouped_f1_comparison.png
-│   ├── keyword_plots.py             # Keyword frequency and word cloud plots
+│   ├── keyword_plots.py             # Keyword frequency plots
 │   └── visualize.py                 # F1 scores, confusion matrices, heatmaps
 └── README.md
 ```
