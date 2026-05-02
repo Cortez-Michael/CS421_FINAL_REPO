@@ -6,14 +6,11 @@ import pandas as pd
 from sklearn.metrics import classification_report
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-# ==========================================
-# 1. Configuration
-# ==========================================
+#config
 OLLAMA_MODEL = "llama3.1:8b"
 OLLAMA_URL = "http://localhost:11434/api/generate"
 
 def save_report_to_csv(report_dict, input_path, output_folder, model_name="Llama"):
-    """Converts a classification_report into a structured CSV (Identical to RoBERTuito)."""
     rows = []
     aggregate_keys = {"accuracy", "macro avg", "weighted avg"}
     
@@ -44,7 +41,6 @@ def save_report_to_csv(report_dict, input_path, output_folder, model_name="Llama
             })
  
     if "accuracy" in report_dict:
-        # Proper Pandas alignment for the accuracy row
         acc_row = pd.DataFrame([{
             "model":     model_name,
             "class":     "accuracy",
@@ -71,33 +67,27 @@ def save_report_to_csv(report_dict, input_path, output_folder, model_name="Llama
     return df
 
 def run_dialect_analysis(csv_file, output_folder):
-    """Processes a single CSV using Llama and generates the prediction and report files concurrently."""
     dialect = os.path.splitext(os.path.basename(csv_file))[0]
     output_path_preds = os.path.join(output_folder, f"{dialect}_{OLLAMA_MODEL.split(':')[0]}_predictions.csv")
 
-    # Load dataset
+    # load dataset
     df = pd.read_csv(csv_file, on_bad_lines='skip', engine='python')
     
-    # --- THE FIX: KILL THE GHOST ROWS AND RESET INDEX ---
-    # Resetting the index is mandatory for multithreading so our list indices map perfectly
     df = df.dropna(subset=['tweet', 'emotion']).reset_index(drop=True)
     
     if len(df) == 0:
         print(f"[!] {dialect}.csv is completely empty after cleaning. Skipping this file...")
         return
-    # ------------------------------------
     
     num_rows = len(df)
     print(f"Starting concurrent inference on {num_rows} rows for {dialect}...")
     
-    # Pre-allocate arrays to maintain strict order during multithreading
     predictions = [None] * num_rows
     keywords_list = [None] * num_rows
     reasoning_list = [None] * num_rows
     true_labels = [None] * num_rows
 
     def process_tweet(index, row):
-        """Worker function to process a single tweet."""
         raw_text = str(row['tweet']) if pd.notna(row['tweet']) else ""
         true_emotion = str(row['emotion']).lower().strip() if pd.notna(row['emotion']) else "unknown"
         
@@ -195,14 +185,10 @@ Text: "{text_cleaned}"
             
         return index, pred_emotion, keys, context, true_emotion
 
-    # --- EXECUTE MULTITHREADING ---
     completed = 0
-    # max_workers=8 maps exactly to OLLAMA_NUM_PARALLEL=8
-    with ThreadPoolExecutor(max_workers=8) as executor:
-        # Submit all jobs to the pool
+    with ThreadPoolExecutor(max_workers=4) as executor:
         futures = {executor.submit(process_tweet, i, row): i for i, row in df.iterrows()}
         
-        # As each tweet finishes processing, lock it into its correct chronological spot
         for future in as_completed(futures):
             i, pred_emotion, keys, context, true_emotion = future.result()
             
@@ -224,7 +210,7 @@ Text: "{text_cleaned}"
         "reasoning": reasoning_list
     })
     results_df.to_csv(output_path_preds, index=False)
-    print(f"[✓] Predictions saved to: {output_path_preds}")
+    print(f"Predictions saved to: {output_path_preds}")
 
     valid_indices = [i for i, p in enumerate(predictions) if p != "error"]
     y_true = [true_labels[i] for i in valid_indices]
@@ -236,20 +222,20 @@ Text: "{text_cleaned}"
         print(classification_report(y_true, y_pred, zero_division=0))
         save_report_to_csv(report_dict, csv_file, output_folder, model_name="Llama")
     else:
-        print(f"[!] No valid predictions to evaluate for {dialect}.")
+        print(f"No valid predictions to evaluate for {dialect}.")
 
 if __name__ == "__main__":
     input_file = 'input_data/mexican.csv' 
-    output_folder = 'results/few-shot/Llama'
+    output_folder = 'results/All_results/Llama_Few_Shot'
     
     os.makedirs(output_folder, exist_ok=True)
     
     if not os.path.exists(input_file):
-        print(f"[!] Error: Could not find '{input_file}'. Make sure the file name and path are correct.")
+        print(f"Error: Could not find '{input_file}'. Make sure the file name and path are correct.")
     else:
         print(f"\n==============================================")
         print(f" Analyzing Dataset: {os.path.basename(input_file)}")
         print(f"==============================================")
         run_dialect_analysis(input_file, output_folder)
         
-        print("\n✅ Dataset processed! You can find the results in the Llama folder.")
+        print("\n Dataset processed! You can find the results in the Llama folder.")

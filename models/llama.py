@@ -6,14 +6,11 @@ import requests
 import pandas as pd
 from sklearn.metrics import classification_report
 
-# ==========================================
-# 1. Configuration
-# ==========================================
+#config
 OLLAMA_MODEL = "llama3.1:8b"
 OLLAMA_URL = "http://localhost:11434/api/generate"
 
 def save_report_to_csv(report_dict, input_path, output_folder, model_name="Llama"):
-    """Converts a classification_report into a structured CSV (Identical to RoBERTuito)."""
     rows = []
     aggregate_keys = {"accuracy", "macro avg", "weighted avg"}
     
@@ -59,15 +56,14 @@ def save_report_to_csv(report_dict, input_path, output_folder, model_name="Llama
     output_path = os.path.join(output_folder, f"{dialect}_{model_name}_classification_report.csv")
     
     df.to_csv(output_path, index=False)
-    print(f"[✓] Report saved to: {output_path}")
+    print(f" Report saved to: {output_path}")
     return df
 
 def run_dialect_analysis(csv_file, output_folder):
-    """Processes a single CSV using Llama and generates the prediction and report files."""
     dialect = os.path.splitext(os.path.basename(csv_file))[0]
     output_path_preds = os.path.join(output_folder, f"{dialect}_Llama_predictions.csv")
 
-    # Load dataset
+    # load dataset
     df = pd.read_csv(csv_file, on_bad_lines='skip', engine='python')
     
     predictions = []
@@ -81,26 +77,19 @@ def run_dialect_analysis(csv_file, output_folder):
         if (index + 1) % 100 == 0:
             print(f"Processed {index + 1}/{len(df)} rows...")
             
-        # Extract the correct columns based on your format
         raw_text = str(row['tweet']) if pd.notna(row['tweet']) else ""
         true_emotion = str(row['emotion']).lower().strip() if pd.notna(row['emotion']) else "unknown"
         
-        # --- THE CLEANUP STEP ---
-        # Strip out the exact words "HASHTAG" and "URL" (case-insensitive)
         text_cleaned = re.sub(r'\b(HASHTAG|URL|USER)\b', '', raw_text, flags=re.IGNORECASE)
         text_cleaned = " ".join(text_cleaned.split())
         
-# Only run the analysis if there is actually text left after cleaning
         if not text_cleaned.strip():
-            # CHANGE 1: Default to 'others' instead of 'neutral'
             predictions.append("others") 
             keywords_list.append("")
             reasoning_list.append("Text was empty after stripping placeholders.")
             true_labels.append(true_emotion)
             continue
             
-        # Gemma JSON Prompt
-        # CHANGE 2: Swapped 'neutral' for 'others' and added a strict rule
         prompt = f"""You are an expert linguist analyzing regional Spanish dialects.
 Analyze the following text and classify its core emotion into exactly one of these: [anger, fear, joy, sadness, disgust, surprise, others].
 If the emotion is ambiguous or does not strongly fit the first six categories, you MUST classify it as "others". Do not invent new emotions.
@@ -130,13 +119,10 @@ Text: "{text_cleaned}"
             raw_output = response.json().get('response', '{}')
             result_dict = json.loads(raw_output)
             
-            # 1. Get the raw prediction
             pred_emotion = result_dict.get('emotion', 'error').lower().strip()
             
-            # --- 2. THE HALLUCINATION FILTER ---
             allowed_emotions = {"anger", "disgust", "fear", "joy", "sadness", "surprise", "others"}
             if pred_emotion not in allowed_emotions and pred_emotion != "error":
-                # If it hallucinates a new word, override it to "others"
                 pred_emotion = "others"
                 
             keys = ", ".join(result_dict.get('keywords', []))
@@ -150,7 +136,6 @@ Text: "{text_cleaned}"
         reasoning_list.append(context)
         true_labels.append(true_emotion)
 
-    # Save the detailed predictions file
     results_df = pd.DataFrame({
         "model_type": "Llama",
         "text": df['tweet'],
@@ -160,14 +145,12 @@ Text: "{text_cleaned}"
         "reasoning": reasoning_list
     })
     results_df.to_csv(output_path_preds, index=False)
-    print(f"[✓] Predictions saved to: {output_path_preds}")
+    print(f" Predictions saved to: {output_path_preds}")
 
-    # Filter out errors for metrics calculation
     valid_indices = [i for i, p in enumerate(predictions) if p != "error"]
     y_true = [true_labels[i] for i in valid_indices]
     y_pred = [predictions[i] for i in valid_indices]
     
-    # Calculate and Save Classification Report
     if len(y_true) > 0:
         report_dict = classification_report(y_true, y_pred, output_dict=True, zero_division=0)
         print("\n--- Evaluation Metrics ---")
@@ -178,17 +161,15 @@ Text: "{text_cleaned}"
 
 if __name__ == "__main__":
     input_folder = 'input_data'
-    output_folder = 'results/Llama'
+    output_folder = 'results/All_results/Llama'
     
-    # 1. Create the output directory automatically
     os.makedirs(output_folder, exist_ok=True)
     
-    # 2. Find all CSV files in the input folder
     search_pattern = os.path.join(input_folder, '*.csv')
     csv_files = glob.glob(search_pattern)
     
     if not csv_files:
-        print(f"[!] No CSV files found in {input_folder}. Please make sure the folder exists and has data.")
+        print(f" No CSV files found in {input_folder}. Please make sure the folder exists and has data.")
     else:
         print(f"Found {len(csv_files)} datasets. Starting batch analysis on Ollama...")
         
@@ -199,4 +180,4 @@ if __name__ == "__main__":
             print(f"==============================================")
             run_dialect_analysis(file_path, output_folder)
             
-        print("\n✅ All datasets processed! You can now compare the Llama and RoBERTuito folders.")
+        print("\nAll datasets processed! You can now compare the Llama and RoBERTuito folders.")

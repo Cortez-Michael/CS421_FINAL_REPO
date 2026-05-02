@@ -5,14 +5,11 @@ import requests
 import pandas as pd
 from sklearn.metrics import classification_report
 
-# ==========================================
-# 1. Configuration
-# ==========================================
+#config
 OLLAMA_MODEL = "gemma4:e4b"
 OLLAMA_URL = "http://localhost:11434/api/generate"
 
 def save_report_to_csv(report_dict, input_path, output_folder, model_name="Gemma"):
-    """Converts a classification_report into a structured CSV (Identical to RoBERTuito)."""
     rows = []
     aggregate_keys = {"accuracy", "macro avg", "weighted avg"}
     
@@ -43,7 +40,7 @@ def save_report_to_csv(report_dict, input_path, output_folder, model_name="Gemma
             })
  
     if "accuracy" in report_dict:
-        # Proper Pandas alignment for the accuracy row
+        # panda
         acc_row = pd.DataFrame([{
             "model":     model_name,
             "class":     "accuracy",
@@ -66,21 +63,18 @@ def save_report_to_csv(report_dict, input_path, output_folder, model_name="Gemma
     output_path = os.path.join(output_folder, f"{dialect}_{model_name}_classification_report.csv")
     
     df.to_csv(output_path, index=False)
-    print(f"[✓] Report saved to: {output_path}")
+    print(f"Report saved to: {output_path}")
     return df
 
 def run_dialect_analysis(csv_file, output_folder):
-    """Processes a single CSV using Gemma and generates the prediction and report files."""
     dialect = os.path.splitext(os.path.basename(csv_file))[0]
     output_path_preds = os.path.join(output_folder, f"{dialect}_Gemma_predictions.csv")
 
     # Load dataset
     df = pd.read_csv(csv_file, on_bad_lines='skip', engine='python')
     
-    # --- THE FIX: KILL THE GHOST ROWS ---
     df = df.dropna(subset=['tweet', 'emotion'])
     
-    # Auto-skip if the dataset is completely empty
     if len(df) == 0:
         print(f"[!] {dialect}.csv is completely empty after cleaning. Skipping this file...")
         return
@@ -260,14 +254,13 @@ def run_dialect_analysis(csv_file, output_folder):
     print(f"Starting inference on {len(df)} rows for {dialect}...")
     
     for index, row in df.iterrows():
-        # Keep progress counter accurate to the actual row index
+        # keep progress counter
         if len(predictions) > 0 and len(predictions) % 100 == 0:
             print(f"Processed {len(predictions)}/{len(df)} rows...")
             
         raw_text = str(row['tweet']) if pd.notna(row['tweet']) else ""
         true_emotion = str(row['emotion']).lower().strip() if pd.notna(row['emotion']) else "unknown"
         
-        # --- THE CLEANUP STEP ---
         text_cleaned = re.sub(r'\b(HASHTAG|URL|USER)\b', '', raw_text, flags=re.IGNORECASE)
         text_cleaned = " ".join(text_cleaned.split())
         
@@ -352,11 +345,9 @@ Text: "{text_cleaned}"
             
             pred_emotion = result_dict.get('emotion', 'error').lower().strip()
             
-            # --- THE HALLUCINATION FILTER ---
             allowed_emotions = {"anger", "disgust", "fear", "joy", "sadness", "surprise", "others"}
             if pred_emotion not in allowed_emotions and pred_emotion != "error":
                 pred_emotion = "others"
-            # --------------------------------
                 
             keys = ", ".join(result_dict.get('keywords', []))
             context = result_dict.get('context', 'No context')
@@ -377,7 +368,7 @@ Text: "{text_cleaned}"
         "reasoning": reasoning_list
     })
     results_df.to_csv(output_path_preds, index=False)
-    print(f"[✓] Predictions saved to: {output_path_preds}")
+    print(f" Predictions saved to: {output_path_preds}")
 
     valid_indices = [i for i, p in enumerate(predictions) if p != "error"]
     y_true = [true_labels[i] for i in valid_indices]
@@ -389,21 +380,20 @@ Text: "{text_cleaned}"
         print(classification_report(y_true, y_pred, zero_division=0))
         save_report_to_csv(report_dict, csv_file, output_folder, model_name="Gemma")
     else:
-        print(f"[!] No valid predictions to evaluate for {dialect}.")
+        print(f"No valid predictions to evaluate for {dialect}.")
 
 if __name__ == "__main__":
-    # --- EDIT THIS LINE ---
     input_file = 'input_data/mexican.csv' 
-    output_folder = 'results/few-shot/Gemma'
+    output_folder = 'results/All_results/Gemma_Few_Shot'
     
     os.makedirs(output_folder, exist_ok=True)
     
     if not os.path.exists(input_file):
-        print(f"[!] Error: Could not find '{input_file}'. Make sure the file name and path are correct.")
+        print(f"Error: Could not find '{input_file}'. Make sure the file name and path are correct.")
     else:
         print(f"\n==============================================")
         print(f" Analyzing Dataset: {os.path.basename(input_file)}")
         print(f"==============================================")
         run_dialect_analysis(input_file, output_folder)
         
-        print("\n✅ Dataset processed! You can find the results in the Gemma folder.")
+        print("\nDataset processed! You can find the results in the Gemma folder.")
