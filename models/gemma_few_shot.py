@@ -76,7 +76,7 @@ def run_dialect_analysis(csv_file, output_folder):
     df = df.dropna(subset=['tweet', 'emotion'])
     
     if len(df) == 0:
-        print(f"[!] {dialect}.csv is completely empty after cleaning. Skipping this file...")
+        print(f"{dialect}.csv is completely empty after cleaning. Skipping this file...")
         return
     # ------------------------------------
     

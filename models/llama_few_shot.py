@@ -63,7 +63,7 @@ def save_report_to_csv(report_dict, input_path, output_folder, model_name="Llama
     output_path = os.path.join(output_folder, f"{dialect}_{model_name}_classification_report.csv")
     
     df.to_csv(output_path, index=False)
-    print(f"[✓] Report saved to: {output_path}")
+    print(f" Report saved to: {output_path}")
     return df
 
 def run_dialect_analysis(csv_file, output_folder):
@@ -76,7 +76,7 @@ def run_dialect_analysis(csv_file, output_folder):
     df = df.dropna(subset=['tweet', 'emotion']).reset_index(drop=True)
     
     if len(df) == 0:
-        print(f"[!] {dialect}.csv is completely empty after cleaning. Skipping this file...")
+        print(f" {dialect}.csv is completely empty after cleaning. Skipping this file...")
         return
     
     num_rows = len(df)

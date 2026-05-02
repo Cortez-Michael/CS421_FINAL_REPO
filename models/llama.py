@@ -157,7 +157,7 @@ Text: "{text_cleaned}"
         print(classification_report(y_true, y_pred, zero_division=0))
         save_report_to_csv(report_dict, csv_file, output_folder, model_name="Llama")
     else:
-        print(f"[!] No valid predictions to evaluate for {dialect}.")
+        print(f" No valid predictions to evaluate for {dialect}.")
 
 if __name__ == "__main__":
     input_folder = 'input_data'
