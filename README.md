@@ -24,23 +24,42 @@ A multilingual emotion classification pipeline for Spanish tweet dialects (Mexic
 
 ```
 project/
-├── models/
-│   ├── mBERT.py              # mBERT transformer model
-│   ├── XLM_roberta.py        # XLM-RoBERTa transformer model
-│   ├── gemma.py              # Gemma zero-shot (Ollama)
-│   ├── gemma_few_shot.py     # Gemma few-shot (Ollama)
-│   ├── llama.py              # Llama zero-shot (Ollama)
-│   ├── llama_few_shot.py     # Llama few-shot (Ollama)
-│   └── emo_parse.py          # Dialect + emotion CSV parser
-├── visualize/
-│   ├── visualize.py          # F1 scores, confusion matrices, heatmaps
-│   └── keyword_plots.py      # Keyword frequency and word cloud plots
-├── input_data/               # Place your dialect CSVs here
+├── input_data/                      # Place your dialect CSVs here
 │   ├── mexican.csv
 │   ├── argentinian.csv
 │   ├── venezuelan.csv
 │   └── spanish_spain.csv
-└── results/                  # Output predictions and reports (auto-created)
+├── models/
+│   ├── XLM_roberta.py               # XLM-RoBERTa transformer model
+│   ├── emo_parse.py                 # Dialect + emotion CSV parser
+│   ├── gemma.py                     # Gemma zero-shot (Ollama)
+│   ├── gemma_few_shot.py            # Gemma few-shot (Ollama)
+│   ├── llama.py                     # Llama zero-shot (Ollama)
+│   ├── llama_few_shot.py            # Llama few-shot (Ollama)
+│   └── mBERT.py                     # mBERT transformer model
+├── raw_data/                        # Raw/unprocessed source data
+├── results/
+│   └── All_results/                 # Output predictions and reports (auto-created)
+│       ├── Gemma/
+│       ├── Gemma_Few_Shot/
+│       ├── Llama/
+│       ├── Llama_Few_Shot/
+│       ├── XLM-RoBERTa/
+│       └── mBERT/
+├── visualize/
+│   ├── plots/                       # All generated plots (auto-created)
+│   │   ├── analysis/                # Cleanliness scores, label distributions
+│   │   ├── comparison/              # Per-model and per-dialect F1 comparisons
+│   │   ├── confusion/               # Confusion matrix heatmaps
+│   │   ├── heatmaps/                # Emotion F1 heatmaps
+│   │   ├── keywords/                # Raw token keyword bar charts
+│   │   ├── keywords_full_words/     # Filtered full-word keyword bar charts
+│   │   ├── average_macro_f1_bar.png
+│   │   ├── average_weighted_f1_bar.png
+│   │   └── single_grouped_f1_comparison.png
+│   ├── keyword_plots.py             # Keyword frequency and word cloud plots
+│   └── visualize.py                 # F1 scores, confusion matrices, heatmaps
+└── README.md
 ```
 
 ---
