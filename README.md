@@ -1,4 +1,4 @@
-# CS421_FINAL_REPO
+# The Dialectal Gap: Evaluating Emotion Detection Reliability Across Regional Spanish Varieties
 
 # Spanish Dialect Emotion Classifier
 
