@@ -1,21 +1,4 @@
-"""
-Emotion + Dialect Classifier
-------------------------------
-Parses a CSV with columns: id, text/tweet, anger, disgust, fear, joy, sadness, surprise
-Combines active emotion columns into a single "emotion" field (e.g. "joy,sadness"),
-uses Ollama to classify Spanish dialect, then writes separate CSV files per dialect.
 
-Setup:
-    1. Install Ollama: https://ollama.com
-    2. Pull a model:
-         ollama pull qwen2.5:14b
-    3. Make sure Ollama is running:
-         ollama serve
-
-Usage:
-    python parse_dialects.py --input data.csv
-    python parse_dialects.py --input data.csv --model qwen2.5:14b
-"""
 
 import argparse
 import csv
@@ -53,16 +36,13 @@ Reply with ONLY valid JSON in this exact format — no preamble, no explanation:
 
 def resolve_emotions(row):
     """Supports both a single 'label' column and binary emotion columns."""
-    # New format: single label column
     if "label" in row and row["label"].strip():
         return row["label"].strip().lower()
     
-    # Old format: binary emotion columns (anger=1, joy=1, etc.)
     active = [emotion for emotion in EMOTION_COLS if row.get(emotion, "0").strip() == "1"]
     return ",".join(active) if active else "none"
 
 
-# ── Ollama classification ─────────────────────────────────────────────────────
 
 def classify_dialect(text, model, retries=3):
     """Send a single tweet to Ollama and return the parsed dialect result."""
@@ -90,7 +70,6 @@ def classify_dialect(text, model, retries=3):
     return {"dialect": "unknown", "confidence": "low"}
 
 
-# ── CSV helpers ───────────────────────────────────────────────────────────────
 
 def get_writer(dialect, output_dir, file_handles, writers):
     """Return (or create) a CSV writer for the given dialect."""
@@ -106,7 +85,6 @@ def get_writer(dialect, output_dir, file_handles, writers):
     return writers[dialect]
 
 
-# ── Input parsing ─────────────────────────────────────────────────────────────
 
 def parse_input(path, delimiter):
     """Read the input file and return a list of row dicts."""
@@ -116,7 +94,6 @@ def parse_input(path, delimiter):
         return [{k.strip(): v.strip() for k, v in row.items() if k is not None} for row in reader]
 
 
-# ── Main ──────────────────────────────────────────────────────────────────────
 
 def main():
     parser = argparse.ArgumentParser(description="Classify emotion+dialect for Spanish tweets")
@@ -150,10 +127,8 @@ def main():
     stats        = defaultdict(int)
 
     for i, row in enumerate(rows, 1):
-        # 1. Grab the original dirty tweet (Safely checks for 'tweet' OR 'text' columns)
         raw_text = row.get("tweet", row.get("text", ""))
         
-        # 2. Make a clean copy specifically for Qwen to read
         clean_text = re.sub(r'\b(HASHTAG|URL|USER)\b', '', raw_text, flags=re.IGNORECASE)
         clean_text = " ".join(clean_text.split())
         
@@ -162,13 +137,11 @@ def main():
         print("[{}/{}] {}".format(i, total, preview))
         print("          -> emotion={}".format(emotion))
 
-        # 3. Check the clean copy. If it's empty, skip Ollama.
         if not clean_text.strip():
             dialect = "unknown"
             confidence = "low"
             print("          -> dialect={}  confidence={} (Empty after cleanup)".format(dialect, confidence))
         else:
-            # Send the clean copy to Qwen
             result     = classify_dialect(clean_text, args.model)
             dialect    = result["dialect"]
             confidence = result["confidence"]
@@ -176,9 +149,9 @@ def main():
 
         out_row = {
             "id":         row.get("id", ""),
-            "tweet":      raw_text,  # We save the original dirty text to the CSV
+            "tweet":      raw_text,  
             "emotion":    emotion,
-            "offensive":  row.get("offensive", "0"), # Grab 'offensive' if it exists, otherwise '0'
+            "offensive":  row.get("offensive", "0"), 
             "dialect":    dialect,
             "confidence": confidence,
         }
